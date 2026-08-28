@@ -1,6 +1,9 @@
 # ===== 依赖包：另一台 clone 下来后，在 pv-site 目录跑 `npm install` 重新装 =====
 portfolio/pv-site/node_modules/
 
+# ===== angel-react 是独立的 git 仓库（单独推到 GitHub ayyyyyi/angel-react），不进 angel 仓库 =====
+portfolio/angel-react/
+
 # ===== 旧的失效 git 元数据（已改名废弃，不传）=====
 portfolio/.git.disabled/
 
