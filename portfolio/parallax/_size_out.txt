@@ -1,0 +1,5 @@
+=== 各图尺寸和模式 ===
+新背景 jpg: (1920, 1071)  mode=RGB
+旧背景 png: (2752, 1536)  mode=RGB
+石柱 png:   (2752, 1536)  mode=RGBA
+神像 png:   (2752, 1536)  mode=RGBA

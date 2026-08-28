@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>视频效果预览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; background: #000; }
+
+    /* 视频铺满整屏当背景 */
+    video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;   /* 铺满，画面会裁掉一点边缘 */
+    }
+
+    /* 底部一行提示，不挡画面 */
+    .hint {
+      position: fixed;
+      left: 0; right: 0; bottom: 28px;
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      font: 15px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+    .hint b { color: #fff; }
+  </style>
+</head>
+<body>
+  <video src="pv.mp4" autoplay muted loop playsinline></video>
+  <div class="hint">这就是你的视频<b>作为网页背景</b>的样子 · 共 15 秒 · 循环播放中</div>
+</body>
+</html>

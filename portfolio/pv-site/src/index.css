@@ -1,0 +1,334 @@
+/* ============ 全局基础 ============ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden; /* 关键：页面本身不滚，滚轮只用来切幕 */
+  background: #0a0a14;
+  color: #ffffff;
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ 页面骨架（单屏） ============ */
+.page {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  background: #0a0a14;
+  overflow: hidden;
+}
+
+/* ============ 全屏背景视频 ============ */
+.bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 铺满整屏，超出裁掉，人物始终居中 */
+  object-position: center;
+  z-index: 1;
+}
+
+/* ============ 切幕淡出遮罩 ============ */
+.fade-overlay {
+  position: absolute;
+  inset: 0;
+  background: #0a0a14;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+  z-index: 2;
+}
+.fade-overlay.on {
+  opacity: 1;
+}
+
+/* ============ 左上角：常驻身份 ============ */
+.brand {
+  position: absolute;
+  left: 56px;
+  top: 44px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.brand-name {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.brand-name::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #ff4d5e; /* 唯一的点缀色，就这一个小红块 */
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.brand-role {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ============ 左下角：当前幕文案 ============ */
+.scene-copy {
+  position: absolute;
+  left: 56px;
+  bottom: 64px;
+  z-index: 3;
+  max-width: 520px;
+  animation: fade-up 0.6s ease; /* 每次切幕，key 变化触发重新淡入 */
+}
+
+.scene-tag {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: #ff4d5e;
+  border: 1px solid rgba(255, 77, 94, 0.55);
+  padding: 6px 14px;
+  border-radius: 999px; /* 胶囊 */
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.scene-title {
+  font-size: 56px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 16px;
+}
+
+.scene-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 440px;
+  margin-bottom: 24px;
+}
+
+.scene-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #ffffff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.scene-detail-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+/* ============ 右上角：幕导航 ============ */
+.scene-nav {
+  position: absolute;
+  right: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nav-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  text-align: right;
+}
+
+.nav-num {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.2s ease;
+}
+.nav-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0);
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: color 0.25s ease, max-width 0.25s ease;
+}
+
+.nav-dot.active .nav-num {
+  color: #ff4d5e;
+}
+.nav-dot:hover .nav-label,
+.nav-dot.active .nav-label {
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 120px;
+}
+
+/* ============ 开始遮罩 ============ */
+.start-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: rgba(10, 10, 20, 0.35);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.start-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 16px 34px;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.start-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
+}
+
+.play-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ff4d5e;
+  font-size: 14px;
+}
+
+.start-hint {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ============ 弹窗 ============ */
+.detail-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 20, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.detail-panel {
+  position: relative;
+  width: min(560px, 90vw);
+  background: rgba(24, 24, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 40px 44px;
+  animation: fade-up 0.35s ease;
+}
+
+.detail-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.detail-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.detail-num {
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  color: #ff4d5e;
+}
+
+.detail-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 10px 0 14px;
+}
+
+.detail-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 28px;
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.meta-row em {
+  font-style: normal;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  min-width: 40px;
+}
+.meta-row span {
+  font-size: 15px;
+  color: #ffffff;
+}
+
+/* ============ 动画 ============ */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoom Parallax · 石柱让开 神像接近</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: #0a0806;
+    color: #fff;
+    font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;           /* 关键：页面本身不滚动，滚动交给 wheel 事件驱动 */
+    height: 100%;
+  }
+
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    color: #fff;
+  }
+  .nav-logo { font-size: 16px; font-weight: 700; letter-spacing: 0.2em; }
+  .nav-menu { display: flex; gap: 32px; font-size: 12px; letter-spacing: 0.15em; opacity: 0.85; }
+  .nav-menu a { color: #fff; text-decoration: none; cursor: pointer; }
+  .nav-menu a:hover { color: #d4b06a; }
+
+  .layer {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
+    will-change: transform;
+  }
+
+  #layer-bg     { z-index: 1; transform-origin: center center; }
+
+  #layer-angel  {
+    z-index: 2;
+    transform-origin: center 62%;   /* 神像在画面偏下，放大中心略靠下，更像迎面走来 */
+  }
+
+  /* 石柱：整张图从中心放大 -> 柱子往两侧让开，神像从中穿过 */
+  #layer-pillar {
+    z-index: 3;
+    transform-origin: center center;
+  }
+
+  .hint {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #d4b06a;
+    letter-spacing: 0.32em;
+    opacity: 0.75;
+    z-index: 20;
+    background: rgba(0,0,0,0.35);
+    padding: 8px 18px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .hint kbd {
+    display: inline-block;
+    min-width: 22px;
+    padding: 2px 6px;
+    margin: 0 2px;
+    border: 1px solid rgba(212,176,106,0.5);
+    border-radius: 3px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: #d4b06a;
+  }
+
+  /* 底部进度条：直观看到"推进到哪了"，也可以直接点/拖 */
+  .progress-track {
+    position: fixed;
+    left: 50%;
+    bottom: 78px;
+    transform: translateX(-50%);
+    width: min(420px, 60vw);
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    z-index: 20;
+    cursor: pointer;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #d4b06a;
+    border-radius: 2px;
+    transition: none;
+  }
+  .progress-label {
+    position: fixed;
+    left: 50%;
+    bottom: 92px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    color: #d4b06a;
+    opacity: 0.85;
+    z-index: 20;
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">AYI · 阿意</div>
+  <div class="nav-menu">
+    <a href="layers-test.html">← 静态版</a>
+    <a href="layers-preview.png" target="_blank">合成图</a>
+  </div>
+</nav>
+
+<img class="layer" id="layer-bg"     src="layer-bg.png"     alt="背景">
+<img class="layer" id="layer-angel"  src="layer-angel.png"  alt="神像">
+<img class="layer" id="layer-pillar" src="layer-pillar.png" alt="石柱">
+
+<div class="progress-label" id="stage-label">远景 · 雪山撑场</div>
+<div class="progress-track" id="progress-track">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<div class="hint">
+  滚轮当油门 · 按住鼠标上下拖也行 &nbsp;|&nbsp; 按 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 开关图层 · <kbd>0</kbd> 全开
+</div>
+
+<script>
+  // ============ 推镜头：进度 p (0~1) 决定三层放大倍数 ============
+  const zoomRange = {
+    bg:     { from: 1.0, to: 1.06 },   // 背景：几乎不变
+    angel:  { from: 1.0, to: 1.38 },   // 神像：逐渐接近（放大 + 上浮）
+    pillar: { from: 1.0, to: 1.70 }    // 石柱：整张从中心放大，往两侧让开
+  };
+
+  const els = {};
+  for (const name in zoomRange) els[name] = document.getElementById('layer-' + name);
+
+  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+
+  function apply(p) {
+    for (const name in zoomRange) {
+      const r = zoomRange[name];
+      const s = r.from + (r.to - r.from) * p;
+
+      if (name === 'angel') {
+        const dy = -p * 44;   // 上浮
+        els[name].style.transform = 'translateY(' + dy.toFixed(1) + 'px) scale(' + s.toFixed(3) + ')';
+      } else {
+        els[name].style.transform = 'scale(' + s.toFixed(3) + ')';
+      }
+    }
+
+    // 更新进度条 + 阶段文字
+    document.getElementById('progress-fill').style.width = (p * 100).toFixed(1) + '%';
+    const label = document.getElementById('stage-label');
+    if (p < 0.33)      label.textContent = '远景 · 雪山撑场';
+    else if (p < 0.66) label.textContent = '中景 · 神像迎面走来';
+    else               label.textContent = '近景 · 石柱从两侧让开';
+  }
+
+  // ============ 驱动方式 ============
+  let target = 0;      // 目标进度
+  let progress = 0;    // 平滑后的进度（实际渲染用）
+
+  // 方式1：滚轮 —— 直接累加进度，不依赖页面滚动（预览面板里也能用）
+  window.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    target = clamp(target + e.deltaY * 0.0008, 0, 1);
+  }, { passive: false });
+
+  // 方式2：按住鼠标上下拖 —— 大牌官网那种 scrub 手感（兜底）
+  let dragging = false;
+  window.addEventListener('mousedown', function () { dragging = true; });
+  window.addEventListener('mouseup', function () { dragging = false; });
+  window.addEventListener('mouseleave', function () { dragging = false; });
+  window.addEventListener('mousemove', function (e) {
+    if (dragging) {
+      target = clamp(1 - e.clientY / window.innerHeight, 0, 1);
+    }
+  });
+
+  // 方式3：触屏滑动（手机/平板）
+  let touchY = null;
+  window.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener('touchmove', function (e) {
+    if (touchY !== null) {
+      const dy = touchY - e.touches[0].clientY;   // 上滑 = 推进
+      target = clamp(target + dy * 0.0012, 0, 1);
+      touchY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  window.addEventListener('touchend', function () { touchY = null; });
+
+  // 进度条：点击/拖动直接跳
+  const track = document.getElementById('progress-track');
+  function trackFromEvent(e) {
+    const rect = track.getBoundingClientRect();
+    return clamp((e.clientX - rect.left) / rect.width, 0, 1);
+  }
+  let trackDragging = false;
+  track.addEventListener('mousedown', function (e) {
+    trackDragging = true;
+    target = trackFromEvent(e);
+    e.stopPropagation();
+  });
+  window.addEventListener('mousemove', function (e) {
+    if (trackDragging) target = trackFromEvent(e);
+  });
+  window.addEventListener('mouseup', function () { trackDragging = false; });
+
+  // ============ 平滑循环 ============
+  function loop() {
+    progress += (target - progress) * 0.12;
+    if (Math.abs(target - progress) < 0.0005) progress = target;
+    apply(progress);
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // ============ 调试工具：单独开关某层 ============
+  const map = { '1': ['bg'], '2': ['angel'], '3': ['pillar'] };
+  document.addEventListener('keydown', e => {
+    const k = e.key;
+    if (k === '0') {
+      Object.values(map).flat().forEach(n => {
+        document.getElementById('layer-' + n).style.display = 'block';
+      });
+    } else if (map[k]) {
+      map[k].forEach(n => {
+        const el = document.getElementById('layer-' + n);
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

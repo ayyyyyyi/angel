@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apogee · 实战练习</title>
+
+  <!-- 字体：Apogee 原版用的 Suisse Intl（在线加载，加载失败会自动换系统默认字体，不影响学习） -->
+  <link href="https://db.onlinewebfonts.com/c/13ab13418f633c1b0516fed6e30bedbc?family=Suisse+Int%27l" rel="stylesheet">
+
+  <style>
+    /* ============================================
+       这里是「皮肤」——所有"长什么样"都写在这
+       每个数字，都对应你学过的一个零件
+       ============================================ */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Suisse Intl', -apple-system, BlinkMacSystemFont, sans-serif;
+      /* 【色号】整个页面的大背景 = #080A19，就是那个"深蓝黑"星空色 */
+      background: #080A19;
+      color: white;
+    }
+
+    /* ===== 顶部导航 ===== */
+    nav {
+      /* 【对齐】导航和下面内容，左边缘都压在同一个 max-width 里，眼睛扫下来是一条直线 */
+      max-width: 1800px;
+      margin: 0 auto;                 /* 居中 */
+      padding: 30px 82px;             /* 【留白间距】上下 30px、左右 82px */
+      display: flex;                  /* logo 靠左、按钮靠右 = 两端对齐 */
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      /* 【字号】logo 字 26px */
+      font-size: 26px;
+      font-weight: 450;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    /* ===== 中间主内容区 ===== */
+    section.hero {
+      /* 占满整个屏幕高度 */
+      min-height: calc(100vh - 112px);
+      display: flex;
+      align-items: center;
+      padding: 32px 82px;
+    }
+
+    .copy {
+      /* 【对齐】左边这一列，最大宽度 593px，所有文字左边缘贴齐 */
+      max-width: 593px;
+    }
+
+    /* ① 大标题 */
+    h1 {
+      /* 【字号】40px = 原来 72px，改成 40px，标题立刻"缩水"了 */
+      font-size: 40px;
+      font-weight: 400;
+      line-height: 0.95;              /* 行高略小于 1，字大时更紧凑、更有气势 */
+      /* 【留白间距】标题到副标题留 32px */
+      margin-bottom: 32px;
+    }
+
+    /* ② 副标题 */
+    .subhead {
+      /* 【字号】20px，比 72px 小很多 → 层次第二层 */
+      font-size: 20px;
+      font-weight: 450;
+      line-height: 1.3;
+      color: rgba(255, 255, 255, 0.8);  /* 【色号】白，但透明到 80% */
+      max-width: 370px;                 /* 【留白间距】限宽，逼它换行 */
+      /* 副标题到按钮留 40px */
+      margin-bottom: 40px;
+    }
+
+    /* ③ 按钮那一行 */
+    .cta-row {
+      display: flex;
+      gap: 16px;                       /* 【留白间距】两个按钮之间隔 16px */
+    }
+
+    /* 按钮的"通用长相" */
+    .btn {
+      /* 【高度】46px —— 手指/鼠标点起来舒服的高度 */
+      height: 46px;
+      /* 【内边距】左右各 27px —— 字离按钮边缘留 27px 呼吸空间 */
+      padding: 0 27px;
+      /* 【圆角】12px —— 四个角微微圆润 */
+      border-radius: 12px;
+      /* 【字号】15.5px，按钮文字 */
+      font-size: 15.5px;
+      font-weight: 450;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+
+    /* 实心按钮（浅灰白） */
+    .btn-solid {
+      background: #E9E9E9;            /* 【色号】浅灰白，这是"点缀色" */
+      color: #0A0707;                 /* 【色号】深色字压在浅底上 */
+    }
+
+    /* 描边按钮（透明底 + 白边） */
+    .btn-outline {
+      background: transparent;
+      color: white;
+      border: 1px solid white;        /* 1px 白描边 */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== 顶部导航 ===== -->
+  <nav>
+    <div class="logo">Apogee</div>
+    <div class="nav-buttons">
+      <button class="btn btn-outline">Login</button>
+      <button class="btn btn-solid">Book a demo</button>
+    </div>
+  </nav>
+
+  <!-- ===== 中间主内容 ===== -->
+  <section class="hero">
+    <div class="copy">
+      <!-- ① 大标题（72px） -->
+      <h1>Elevate your essential data to new heights</h1>
+
+      <!-- ② 副标题（20px，白80%） -->
+      <p class="subhead">Advanced reasoning systems and predictive models built for the unknown</p>
+
+      <!-- ③ 两个按钮（高度46、圆角12、内边距27） -->
+      <div class="cta-row">
+        <button class="btn btn-solid">Book a demo</button>
+        <button class="btn btn-outline">Talk with the team</button>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

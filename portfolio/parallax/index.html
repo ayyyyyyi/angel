@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阿意 · Step Into the Hallowed Light</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: #0a0806;
+  color: #fff;
+  font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  /* 关键：用 clip 而不是 hidden。hidden 会偷偷把 body 变成滚动容器，
+     导致 position:sticky 钉屏失效（画面跟着滚走）。clip 不会创建滚动容器。 */
+  overflow-x: clip;
+}
+
+/* 由 JS 滚动驱动的四个变量 */
+:root {
+  --scale: 1.0;     /* 镜头推近：1.0 → 1.28 */
+  --hole: 46%;      /* 清晰窗口半径：46% → 8%，越小越聚焦 */
+  --glow: 0;        /* 圣光强度：0 → 0.45 */
+  --content-op: 1;  /* 标题文字透明度 */
+}
+
+/* 滚动舞台：占 4 屏高（只提供"滚动轨道"，视觉上永远钉在 1 屏） */
+.hero { position: relative; height: 400vh; }
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 底层：清晰背景 */
+.bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('cover.png');
+  background-size: cover;
+  background-position: center;
+  transform: scale(var(--scale));
+  will-change: transform;
+}
+
+/* 上层：同一张图 + 模糊 + 压暗，中间挖一个"洞"露出底下清晰图 */
+.blur {
+  position: absolute;
+  inset: 0;
+  background-image: url('cover.png');
+  background-size: cover;
+  background-position: center;
+  filter: blur(9px) brightness(0.55);
+  transform: scale(var(--scale));
+  -webkit-mask-image: radial-gradient(circle at 50% 47%,
+    transparent 0%,
+    transparent calc(var(--hole) - 3%),
+    black var(--hole),
+    black 100%);
+  mask-image: radial-gradient(circle at 50% 47%,
+    transparent 0%,
+    transparent calc(var(--hole) - 3%),
+    black var(--hole),
+    black 100%);
+  will-change: transform, mask-image;
+}
+
+/* 圣光光晕：叠在清晰窗口上，随滚动变亮 */
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 47%, rgba(212, 176, 106, var(--glow)) 0%, transparent 42%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* 柔和暗角，兜底加深四周 */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 95% 95% at 50% 50%, transparent 58%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+/* 标题文字层 */
+.content {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+  opacity: var(--content-op);
+  pointer-events: none;
+}
+.tag {
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  color: #d4b06a;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.title {
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.12;
+  text-shadow: 0 4px 34px rgba(0,0,0,0.75);
+  margin-bottom: 22px;
+}
+.sub {
+  font-size: 16px;
+  color: #e6d8b8;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+}
+.scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #d4b06a;
+  letter-spacing: 0.4em;
+  opacity: 0.7;
+  animation: pulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 0.85; transform: translateX(-50%) translateY(6px); }
+}
+
+/* 顶部导航 */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: 24px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  color: #fff;
+}
+.nav-logo { font-size: 16px; font-weight: 700; letter-spacing: 0.2em; }
+.nav-menu { display: flex; gap: 32px; font-size: 12px; letter-spacing: 0.15em; opacity: 0.85; }
+.nav-menu a { color: #fff; text-decoration: none; cursor: pointer; transition: color 0.3s; }
+.nav-menu a:hover { color: #d4b06a; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">AYI · 阿意</div>
+  <div class="nav-menu">
+    <a>作品</a>
+    <a>经历</a>
+    <a>关于</a>
+    <a>联系</a>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="stage">
+    <div class="bg"></div>
+    <div class="blur"></div>
+    <div class="glow"></div>
+    <div class="vignette"></div>
+    <div class="content">
+      <div class="tag">PORTFOLIO · 2026</div>
+      <h1 class="title">Step Into the<br>Hallowed Light</h1>
+      <p class="sub">穿过圣光之门 · 进入阿意的作品世界</p>
+    </div>
+    <div class="scroll-hint">↓ SCROLL TO ENTER</div>
+  </div>
+</section>
+
+<script>
+// 滚动驱动：把滚动进度，映射成 4 个 CSS 变量。
+// 画面永远钉在屏幕上（sticky），滚轮只是"遥控器"，推着镜头往前走。
+const root = document.documentElement;
+const hero = document.getElementById('hero');
+
+// 缓动：慢 → 快 → 慢，让镜头推近更有电影感（开头缓缓起、结尾稳稳落）
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function update() {
+  // 滚动进度：0（没滚）→ 1（滚完 400vh 的滚动轨道）
+  const total = hero.offsetHeight - window.innerHeight;
+  const raw = Math.min(1, Math.max(0, window.scrollY / total));
+  const p = easeInOutCubic(raw);
+
+  // 1. 镜头推近：1.0 → 1.28
+  const scale = 1.0 + p * 0.28;
+  // 2. 清晰窗口收窄：46% → 8%（聚焦到天使）
+  const hole = 46 - p * 38;
+  // 3. 圣光变亮：0 → 0.45
+  const glow = p * 0.45;
+  // 4. 标题文字淡出：前 35% 保持，35%→70% 淡出
+  const contentOp = p < 0.35 ? 1 : Math.max(0, 1 - (p - 0.35) / 0.35);
+
+  root.style.setProperty('--scale', scale.toFixed(4));
+  root.style.setProperty('--hole', hole.toFixed(2) + '%');
+  root.style.setProperty('--glow', glow.toFixed(3));
+  root.style.setProperty('--content-op', contentOp.toFixed(3));
+}
+
+window.addEventListener('scroll', update, { passive: true });
+update();
+</script>
+</body>
+</html>
