@@ -352,7 +352,7 @@
   // 节奏：石柱先起步，神像晚一点点跟上（几乎同步），两者并行推到结尾，速度都是"先慢后快"
   const zoomRange = {
     bg:     { from: 1.00, to: 1.10, start: 0.00, end: 1.00, ease: 'linear'    },  // 背景：全程匀速微放大
-    angel:  { from: 1.00, to: 3.00, start: 0.00, end: 1.00, ease: 'smoothstep' },  // 神像：和石柱一起启动，smoothstep 更平缓（后段不猛冲，贴脸过程摊薄拉长）
+    angel:  { from: 1.00, to: 2.20, start: 0.00, end: 0.80, ease: 'easeInOut' },  // 神像：和石柱完全同步（同样的缓入缓出 + 同样 80% 停住），消除割裂
     pillar: { from: 1.00, to: 2.20, start: 0.00, end: 0.80, ease: 'easeInOut' }   // 石柱：缓入缓出让开，跟到 80% 停住
   };
 
