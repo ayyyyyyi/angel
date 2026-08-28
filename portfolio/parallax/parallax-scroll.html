@@ -43,7 +43,7 @@
 
   #layer-angel  {
     z-index: 2;
-    transform-origin: center 62%;   /* 神像在画面偏下，放大中心略靠下，更像迎面走来 */
+    transform-origin: 50% 38%;   /* 脸部位置：放大中心钉在神像脸上，scale 时脸部不动，周围推到屏外 */
   }
 
   /* 石柱：整张图从中心放大 -> 柱子往两侧让开，神像从中穿过 */
@@ -110,6 +110,119 @@
     opacity: 0.85;
     z-index: 20;
   }
+
+  /* ===== 转场后的视频画面（素材还没做，先占位） ===== */
+  .video-scene {
+    position: fixed; inset: 0;
+    z-index: 7;                    /* 卡片(8)下方、神像(2)上方 */
+    background:
+      radial-gradient(120% 90% at 50% 40%, rgba(70,58,40,0.25), rgba(5,4,3,0.95) 70%),
+      #050403;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .video-scene.show { opacity: 1; pointer-events: auto; }
+  .video-scene video { width: 100%; height: 100%; object-fit: cover; }
+  .video-ph {
+    text-align: center;
+    font-size: 46px;
+    line-height: 1;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.12em;
+  }
+  .video-ph span {
+    display: block; margin-top: 18px;
+    font-size: 13px; letter-spacing: 0.45em;
+    color: rgba(255,255,255,0.38);
+  }
+
+  /* ===== 弧形作品卡片（滚到深处浮现） ===== */
+  .cards-stage {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    width: 0; height: 0;
+    z-index: 8;                 /* 高于三层图(1/2/3)，低于导航(10)和进度条(20) */
+    pointer-events: none;
+  }
+  .card {
+    position: absolute;
+    left: 0; top: 0;
+    width: 200px;
+    height: 280px;
+    margin-left: -100px;        /* 让 (0,0) 对齐卡片中心 */
+    margin-top: -140px;
+    border-radius: 16px;
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+    border: 1px solid rgba(212,176,106,0.35);
+    background: linear-gradient(165deg, rgba(26,21,15,0.88), rgba(10,8,6,0.72));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 22px 55px rgba(0,0,0,0.55);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    will-change: transform, opacity;
+    overflow: hidden;
+  }
+  .card:hover {
+    border-color: rgba(212,176,106,0.9);
+    box-shadow: 0 28px 65px rgba(0,0,0,0.72);
+    filter: brightness(1.08);
+  }
+  .card-glow {
+    position: absolute; inset: 0;
+    border-radius: 16px;
+    pointer-events: none;
+    background: radial-gradient(130% 55% at 50% 0%, var(--glow, rgba(212,176,106,0.20)), transparent 62%);
+  }
+  .card-emoji { font-size: 36px; line-height: 1; position: relative; }
+  .card-body { margin-top: 14px; position: relative; }
+  .card-title { font-size: 21px; font-weight: 700; letter-spacing: 0.03em; color: #fff; }
+  .card-sub { margin-top: 8px; font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.62); }
+  .card-tag { margin-top: auto; position: relative; font-size: 10px; letter-spacing: 0.24em; color: #d4b06a; }
+
+  /* ===== 卡片详情浮层 ===== */
+  .card-overlay {
+    position: fixed; inset: 0;
+    z-index: 30;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center; justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .card-overlay.show { opacity: 1; pointer-events: auto; }
+  .card-overlay-panel {
+    width: min(680px, 88vw);
+    border-radius: 20px;
+    border: 1px solid rgba(212,176,106,0.4);
+    background: linear-gradient(160deg, rgba(28,23,16,0.96), rgba(12,10,7,0.92));
+    padding: 44px;
+    color: #fff;
+    transform: translateY(20px) scale(0.96);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    position: relative;
+  }
+  .card-overlay.show .card-overlay-panel { transform: translateY(0) scale(1); }
+  .card-overlay-close {
+    position: absolute; top: 16px; right: 20px;
+    font-size: 22px; line-height: 1;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+  }
+  .card-overlay-close:hover { color: #d4b06a; }
+  .card-overlay-emoji { font-size: 56px; }
+  .card-overlay-title { margin-top: 16px; font-size: 30px; font-weight: 700; letter-spacing: 0.02em; }
+  .card-overlay-tag { margin-top: 6px; font-size: 11px; letter-spacing: 0.28em; color: #d4b06a; }
+  .card-overlay-desc { margin-top: 22px; font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.78); }
 </style>
 </head>
 <body>
@@ -131,31 +244,101 @@
   <div class="progress-fill" id="progress-fill"></div>
 </div>
 
+<!-- 转场后的视频画面：素材做好后，把下面占位换成 <video src="xxx.mp4" autoplay muted playsinline></video> -->
+<div class="video-scene" id="video-scene">
+  <div class="video-ph">🎬<span>视频画面 · 待定</span></div>
+</div>
+
+<div class="cards-stage" id="cards-stage"></div>
+
+<div class="card-overlay" id="card-overlay">
+  <div class="card-overlay-panel">
+    <div class="card-overlay-close" id="overlay-close">✕</div>
+    <div class="card-overlay-emoji" id="ov-emoji"></div>
+    <div class="card-overlay-title" id="ov-title"></div>
+    <div class="card-overlay-tag" id="ov-tag"></div>
+    <div class="card-overlay-desc" id="ov-desc"></div>
+  </div>
+</div>
+
 <div class="hint">
   滚轮当油门 · 按住鼠标上下拖也行 &nbsp;|&nbsp; 按 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 开关图层 · <kbd>0</kbd> 全开
 </div>
 
 <script>
-  // ============ 推镜头：进度 p (0~1) 决定三层放大倍数 ============
+  // ============ 缓动曲线（变速推进的关键） ============
+  // 关键：纯"先慢后快"（easeIn）结尾斜率最大，会"越滚越猛+结尾急刹"，视觉上不丝滑。
+  // 换成"缓入缓出"S 曲线（先慢→中快→结尾收住）后，全程平滑，没有猛冲急停的顿挫。
+  const EASING = {
+    linear:    t => t,
+    easeIn:    t => t * t * t,                              // 纯先慢后快：结尾最猛，容易"急刹"（不丝滑，留作对比）
+    easeInQuad:t => t * t,                                  // 平方版"先慢后快"
+    easeOut:   t => 1 - Math.pow(1 - t, 3),                 // 先快后慢（一般不用，留作反向）
+    easeInOut: t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2,  // 缓入缓出立方：慢→快→慢，全程丝滑
+    smoothstep:t => t * t * (3 - 2 * t)                     // 更柔和的 S 曲线（两端斜率都归零，最丝滑）
+  };
+
+  // ============ 推镜头：分段驱动 ============
+  // 每个图层有自己的变化区间 [start, end] + 缓动曲线 ease，在区间内从 from 放大到 to
+  // 节奏：石柱先起步，神像晚一点点跟上（几乎同步），两者并行推到结尾，速度都是"先慢后快"
   const zoomRange = {
-    bg:     { from: 1.0, to: 1.06 },   // 背景：几乎不变
-    angel:  { from: 1.0, to: 1.38 },   // 神像：逐渐接近（放大 + 上浮）
-    pillar: { from: 1.0, to: 1.70 }    // 石柱：整张从中心放大，往两侧让开
+    bg:     { from: 1.00, to: 1.10, start: 0.00, end: 1.00, ease: 'linear'    },  // 背景：全程匀速微放大
+    angel:  { from: 1.00, to: 3.00, start: 0.00, end: 1.00, ease: 'smoothstep' },  // 神像：和石柱一起启动，smoothstep 更平缓（后段不猛冲，贴脸过程摊薄拉长）
+    pillar: { from: 1.00, to: 2.20, start: 0.00, end: 0.80, ease: 'easeInOut' }   // 石柱：缓入缓出让开，跟到 80% 停住
   };
 
   const els = {};
   for (const name in zoomRange) els[name] = document.getElementById('layer-' + name);
+
+  // ============ 弧形作品卡片（滚到深处浮现） ============
+  const CARDS = [
+    { emoji:'🎮', title:'项目案例', sub:'游戏发行 · 数据增长', tag:'PROJECT', glow:'rgba(212,176,106,0.28)', desc:'负责游戏发行与数据增长：从达人筛选、创意内容到投放复盘，全流程跟进，用数据说话。' },
+    { emoji:'🎬', title:'内容创作', sub:'达人内容 · 热点借势', tag:'CONTENT', glow:'rgba(140,180,255,0.28)', desc:'视频 / 图文 / 文案多形态内容创作，紧跟平台热点借势，打造有传播力的作品。' },
+    { emoji:'🤝', title:'实习经历', sub:'多款游戏 · KOL 运营', tag:'INTERN', glow:'rgba(150,220,180,0.28)', desc:'覆盖 FPS / 二次元 / 模拟经营等多品类游戏的 KOL/KOC 运营与达人对接实战。' },
+    { emoji:'📊', title:'数据复盘', sub:'投放数据 · 效果分析', tag:'DATA', glow:'rgba(255,180,140,0.28)', desc:'投放数据汇总、异常定位与效果复盘，看点击率与单位效率，而不只看曝光总量。' },
+    { emoji:'📣', title:'达人招募', sub:'KOL/KOC · 资源对接', tag:'KOL', glow:'rgba(220,170,255,0.28)', desc:'精准筛选、挖掘与对接多垂类达人资源，统筹渠道供应商，保障内容稳定输出。' },
+  ];
+
+  const arc = { spread: 165, lift: 34, tilt: 12, scaleDrop: 0.055, baseY: -150 };
+
+  const stage = document.getElementById('cards-stage');
+  const cardEls = CARDS.map((c, i) => {
+    const idx = i - (CARDS.length - 1) / 2;   // -2,-1,0,1,2（0 是中间）
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML =
+      '<div class="card-glow"></div>' +
+      '<div class="card-emoji">' + c.emoji + '</div>' +
+      '<div class="card-body"><div class="card-title">' + c.title + '</div>' +
+      '<div class="card-sub">' + c.sub + '</div></div>' +
+      '<div class="card-tag">' + c.tag + ' · 查看 →</div>';
+    el.style.setProperty('--glow', c.glow);
+    stage.appendChild(el);
+    return { el, idx, data: c };
+  });
 
   function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 
   function apply(p) {
     for (const name in zoomRange) {
       const r = zoomRange[name];
-      const s = r.from + (r.to - r.from) * p;
+      // 把全局进度 p 映射到本层局部进度 t（0~1），实现「错峰」错开
+      const t = clamp((p - r.start) / (r.end - r.start), 0, 1);
+      // 关键：t 再过一条缓动曲线（ease），把"匀速"变成"先慢后快"
+      const e = EASING[r.ease || 'linear'](t);
+      const s = r.from + (r.to - r.from) * e;
 
       if (name === 'angel') {
-        const dy = -p * 44;   // 上浮
+        // 神像段：上浮跟随缓动后的进度（缓入缓出），段尾（e>0.85）轻微淡出
+        const dy = -e * 20;
+        const op = e < 0.85 ? 1 : 1 - (e - 0.85) * 2;   // 0.85→1.0 时 1→0.7
+        els[name].style.opacity = op.toFixed(2);
         els[name].style.transform = 'translateY(' + dy.toFixed(1) + 'px) scale(' + s.toFixed(3) + ')';
+      } else if (name === 'pillar') {
+        // 石柱：跟到 80% 停住，之后才淡出（p>0.80），让神像有足够时间一起推进
+        const op = p < 0.80 ? 1 : Math.max(0, 1 - (p - 0.80) * 5);  // 0.80→1.00 时 1→0
+        els[name].style.opacity = op.toFixed(2);
+        els[name].style.transform = 'scale(' + s.toFixed(3) + ')';
       } else {
         els[name].style.transform = 'scale(' + s.toFixed(3) + ')';
       }
@@ -164,10 +347,64 @@
     // 更新进度条 + 阶段文字
     document.getElementById('progress-fill').style.width = (p * 100).toFixed(1) + '%';
     const label = document.getElementById('stage-label');
-    if (p < 0.33)      label.textContent = '远景 · 雪山撑场';
-    else if (p < 0.66) label.textContent = '中景 · 神像迎面走来';
-    else               label.textContent = '近景 · 石柱从两侧让开';
+    if (p < 0.80)      label.textContent = '石柱让开 · 神像同步推进';
+    else if (p < 0.90) label.textContent = '贴脸 · 石柱退场';
+    else               label.textContent = '贴脸 · 转场';
   }
+
+  // ============ 场景状态机：parallax(推镜) → transition(淡出) → video(视频画面+卡片) ============
+  let scene = 'parallax';
+  let transitioning = false;
+  let cardT = 0;                 // 卡片浮现进度 0~1，独立于 p（转场后才驱动）
+
+  // 卡片弧形展开：t 0~1，先整体升起淡入，再两侧展开成弧形
+  function setCards(t) {
+    const cOp = clamp(t, 0, 1);
+    const spreadT = clamp((t - 0.35) / 0.65, 0, 1);
+    const liftPx = (1 - cOp) * 300;
+    for (const { el, idx } of cardEls) {
+      const abs = Math.abs(idx);
+      const x = idx * arc.spread * spreadT;
+      const y = arc.baseY + (-abs * arc.lift * spreadT) + liftPx;
+      const rot = idx * arc.tilt * spreadT;
+      const sc = 1 - abs * arc.scaleDrop * spreadT;
+      el.style.opacity = cOp.toFixed(3);
+      el.style.pointerEvents = cOp > 0.5 ? 'auto' : 'none';
+      el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
+    }
+  }
+
+  // 滚到底 → 视差画面淡出 → 切进视频画面 → 卡片浮现
+  function transitionToVideo() {
+    if (transitioning) return;
+    transitioning = true;
+    scene = 'transition';
+
+    // 三层图淡出
+    ['bg', 'angel', 'pillar'].forEach(n => {
+      const el = document.getElementById('layer-' + n);
+      el.style.transition = 'opacity 0.6s ease';
+      el.style.opacity = '0';
+    });
+
+    // 进度条 + 标签淡出
+    const trackEl = document.getElementById('progress-track');
+    const labelEl = document.getElementById('stage-label');
+    trackEl.style.transition = 'opacity 0.5s ease';
+    trackEl.style.opacity = '0';
+    labelEl.textContent = '转场 · 进入视频画面';
+    labelEl.style.transition = 'opacity 0.5s ease';
+    labelEl.style.opacity = '0';
+
+    // 视频场景淡入
+    document.getElementById('video-scene').classList.add('show');
+
+    // 0.65s 后进入 video 场景，卡片开始浮现
+    setTimeout(() => { scene = 'video'; }, 650);
+  }
+
+  // 初始：卡片隐藏
+  setCards(0);
 
   // ============ 驱动方式 ============
   let target = 0;      // 目标进度
@@ -176,7 +413,7 @@
   // 方式1：滚轮 —— 直接累加进度，不依赖页面滚动（预览面板里也能用）
   window.addEventListener('wheel', function (e) {
     e.preventDefault();
-    target = clamp(target + e.deltaY * 0.0008, 0, 1);
+    target = clamp(target + e.deltaY * 0.0005, 0, 1);
   }, { passive: false });
 
   // 方式2：按住鼠标上下拖 —— 大牌官网那种 scrub 手感（兜底）
@@ -196,7 +433,7 @@
   window.addEventListener('touchmove', function (e) {
     if (touchY !== null) {
       const dy = touchY - e.touches[0].clientY;   // 上滑 = 推进
-      target = clamp(target + dy * 0.0012, 0, 1);
+      target = clamp(target + dy * 0.0010, 0, 1);
       touchY = e.touches[0].clientY;
     }
   }, { passive: true });
@@ -223,10 +460,45 @@
   function loop() {
     progress += (target - progress) * 0.12;
     if (Math.abs(target - progress) < 0.0005) progress = target;
-    apply(progress);
+
+    if (scene === 'parallax' && !transitioning) {
+      apply(progress);
+      // 滚到底（>=0.999）自动触发转场
+      if (progress >= 0.999) transitionToVideo();
+    } else if (scene === 'video') {
+      // 转场完成后，卡片浮现缓动
+      cardT += (1 - cardT) * 0.08;
+      if (1 - cardT < 0.001) cardT = 1;
+      setCards(cardT);
+    }
+
     requestAnimationFrame(loop);
   }
   loop();
+
+  // ============ 卡片点击 → 详情浮层 ============
+  const overlay = document.getElementById('card-overlay');
+  const ov = {
+    emoji: document.getElementById('ov-emoji'),
+    title: document.getElementById('ov-title'),
+    tag: document.getElementById('ov-tag'),
+    desc: document.getElementById('ov-desc'),
+  };
+  function openCard(data) {
+    ov.emoji.textContent = data.emoji;
+    ov.title.textContent = data.title;
+    ov.tag.textContent = data.tag + ' · 查看详情';
+    ov.desc.textContent = data.desc;
+    overlay.classList.add('show');
+  }
+  function closeCard() { overlay.classList.remove('show'); }
+  cardEls.forEach(({ el, data }) => {
+    el.addEventListener('click', () => openCard(data));
+  });
+  document.getElementById('overlay-close').addEventListener('click', closeCard);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCard(); });
+  overlay.addEventListener('mousedown', (e) => e.stopPropagation());   // 避免触发页面拖拽
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCard(); });
 
   // ============ 调试工具：单独开关某层 ============
   const map = { '1': ['bg'], '2': ['angel'], '3': ['pillar'] };

@@ -8,3 +8,8 @@ portfolio/.git.disabled/
 .DS_Store
 Thumbs.db
 *.log
+
+# ===== 临时预览/提取产物（每次重新生成，不进仓库）=====
+portfolio/parallax/face-preview.png
+portfolio/parallax/face-preview-v2.png
+portfolio/parallax/_pdf_full.txt
