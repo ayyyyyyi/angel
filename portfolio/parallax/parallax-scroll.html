@@ -138,53 +138,109 @@
     color: rgba(255,255,255,0.38);
   }
 
-  /* ===== 弧形作品卡片（滚到深处浮现） ===== */
+  /* ===== 横排一字卡（米色调，仿"FALL INTO REVERIE"参考图） ===== */
   .cards-stage {
     position: fixed;
     left: 50%;
     bottom: 0;
     width: 0; height: 0;
-    z-index: 8;                 /* 高于三层图(1/2/3)，低于导航(10)和进度条(20) */
+    z-index: 8;                 /* 高于三层图(1/2/3)和视频场景(7)，低于导航(10)和进度条(20) */
     pointer-events: none;
   }
   .card {
     position: absolute;
     left: 0; top: 0;
-    width: 200px;
-    height: 280px;
-    margin-left: -100px;        /* 让 (0,0) 对齐卡片中心 */
-    margin-top: -140px;
+    width: 220px;
+    height: 290px;
+    margin-left: -110px;        /* 让 (0,0) 对齐卡片中心 */
+    margin-top: -145px;
     border-radius: 16px;
     cursor: pointer;
     pointer-events: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 18px;
-    border: 1px solid rgba(212,176,106,0.35);
-    background: linear-gradient(165deg, rgba(26,21,15,0.88), rgba(10,8,6,0.72));
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 22px 55px rgba(0,0,0,0.55);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    padding: 26px 24px;
+    /* 米色主调：上方稍亮（光源从上来），下方稍深一档做厚度感 */
+    background: linear-gradient(165deg, #e7d4b3 0%, #dac4a3 65%, #cfb88f 100%);
+    box-shadow:
+      0 22px 50px rgba(0,0,0,0.55),
+      0 6px 14px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.28);    /* 顶上一抹高光 */
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
     will-change: transform, opacity;
-    overflow: hidden;
+    overflow: visible;
   }
   .card:hover {
-    border-color: rgba(212,176,106,0.9);
-    box-shadow: 0 28px 65px rgba(0,0,0,0.72);
-    filter: brightness(1.08);
+    /* hover 时原位浮起，最直接的交互反馈 */
+    box-shadow:
+      0 30px 70px rgba(0,0,0,0.68),
+      0 8px 20px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.32);
   }
-  .card-glow {
-    position: absolute; inset: 0;
-    border-radius: 16px;
+  /* 编号小圆圈（右上角） */
+  .card-num {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 34px; height: 34px;
+    border: 1px solid rgba(58, 42, 26, 0.35);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.10);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: #3a2a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* 标题：衬线大字号，米色调深棕色，复古杂志风 */
+  .card-title {
+    margin-top: 64px;
+    font-family: Georgia, 'Playfair Display', 'Times New Roman', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.005em;
+    color: #2b1f12;
+  }
+  /* 描述：小字、柔软一点 */
+  .card-desc {
+    margin-top: 14px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: rgba(43, 31, 18, 0.70);
+    letter-spacing: 0.01em;
+  }
+  /* 激活态：中央卡（或 hover 卡）出现 ▶ */
+  .card-play {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    display: flex;
+    align-items: center; justify-content: center;
+    font-size: 22px;
+    color: #2b1f12;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1);
     pointer-events: none;
-    background: radial-gradient(130% 55% at 50% 0%, var(--glow, rgba(212,176,106,0.20)), transparent 62%);
   }
-  .card-emoji { font-size: 36px; line-height: 1; position: relative; }
-  .card-body { margin-top: 14px; position: relative; }
-  .card-title { font-size: 21px; font-weight: 700; letter-spacing: 0.03em; color: #fff; }
-  .card-sub { margin-top: 8px; font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.62); }
-  .card-tag { margin-top: auto; position: relative; font-size: 10px; letter-spacing: 0.24em; color: #d4b06a; }
+  .card.playing .card-play {
+    opacity: 1;
+  }
+  /* 激活态加强（不要用 !important transform，会覆盖 JS 算的位移） */
+  .card.playing {
+    /* 阴影更深、更显眼 */
+    box-shadow:
+      0 32px 78px rgba(0,0,0,0.72),
+      0 10px 22px rgba(0,0,0,0.45),
+      inset 0 1px 0 rgba(255,255,255,0.36);
+  }
+  /* 鼠标悬浮时也显示 ▶（更直观） */
+  .card:hover .card-play {
+    opacity: 1;
+  }
 
   /* ===== 卡片详情浮层 ===== */
   .card-overlay {
@@ -219,7 +275,19 @@
     cursor: pointer;
   }
   .card-overlay-close:hover { color: #d4b06a; }
-  .card-overlay-emoji { font-size: 56px; }
+  /* 详情浮层顶部的圆形编号徽标（仿卡上编号样式，但更大更显眼） */
+  .card-overlay-num {
+    width: 56px; height: 56px;
+    border: 1px solid rgba(212,176,106,0.5);
+    border-radius: 50%;
+    background: rgba(212,176,106,0.10);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    color: #d4b06a;
+    display: flex;
+    align-items: center; justify-content: center;
+    letter-spacing: 0.05em;
+  }
   .card-overlay-title { margin-top: 16px; font-size: 30px; font-weight: 700; letter-spacing: 0.02em; }
   .card-overlay-tag { margin-top: 6px; font-size: 11px; letter-spacing: 0.28em; color: #d4b06a; }
   .card-overlay-desc { margin-top: 22px; font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.78); }
@@ -235,6 +303,7 @@
   </div>
 </nav>
 
+<!-- 背景层：静态雪山图（保持原样） -->
 <img class="layer" id="layer-bg"     src="layer-bg.png"     alt="背景">
 <img class="layer" id="layer-angel"  src="layer-angel.png"  alt="神像">
 <img class="layer" id="layer-pillar" src="layer-pillar.png" alt="石柱">
@@ -254,8 +323,8 @@
 <div class="card-overlay" id="card-overlay">
   <div class="card-overlay-panel">
     <div class="card-overlay-close" id="overlay-close">✕</div>
-    <div class="card-overlay-emoji" id="ov-emoji"></div>
-    <div class="card-overlay-title" id="ov-title"></div>
+<div class="card-overlay-num" id="ov-emoji"></div>
+  <div class="card-overlay-title" id="ov-title"></div>
     <div class="card-overlay-tag" id="ov-tag"></div>
     <div class="card-overlay-desc" id="ov-desc"></div>
   </div>
@@ -290,29 +359,37 @@
   const els = {};
   for (const name in zoomRange) els[name] = document.getElementById('layer-' + name);
 
-  // ============ 弧形作品卡片（滚到深处浮现） ============
+  // ============ 作品卡（横排一字+微 perspective，仿"FALL INTO REVERIE"） ============
+  // card-desc 是卡上展示的短描述（约 25~35 字）；full 是点开浮层后的完整描述
   const CARDS = [
-    { emoji:'🎮', title:'项目案例', sub:'游戏发行 · 数据增长', tag:'PROJECT', glow:'rgba(212,176,106,0.28)', desc:'负责游戏发行与数据增长：从达人筛选、创意内容到投放复盘，全流程跟进，用数据说话。' },
-    { emoji:'🎬', title:'内容创作', sub:'达人内容 · 热点借势', tag:'CONTENT', glow:'rgba(140,180,255,0.28)', desc:'视频 / 图文 / 文案多形态内容创作，紧跟平台热点借势，打造有传播力的作品。' },
-    { emoji:'🤝', title:'实习经历', sub:'多款游戏 · KOL 运营', tag:'INTERN', glow:'rgba(150,220,180,0.28)', desc:'覆盖 FPS / 二次元 / 模拟经营等多品类游戏的 KOL/KOC 运营与达人对接实战。' },
-    { emoji:'📊', title:'数据复盘', sub:'投放数据 · 效果分析', tag:'DATA', glow:'rgba(255,180,140,0.28)', desc:'投放数据汇总、异常定位与效果复盘，看点击率与单位效率，而不只看曝光总量。' },
-    { emoji:'📣', title:'达人招募', sub:'KOL/KOC · 资源对接', tag:'KOL', glow:'rgba(220,170,255,0.28)', desc:'精准筛选、挖掘与对接多垂类达人资源，统筹渠道供应商，保障内容稳定输出。' },
+    { num: '01', title: '项目案例',  cardDesc: '游戏发行与数据增长全流程：达人筛选、创意内容到投放复盘。',
+      full: '负责游戏发行与数据增长：从达人筛选、创意内容制作到投放复盘，全流程跟进。用数据验证方向，不只看曝光，更看点击率与单位效率。' },
+    { num: '02', title: '内容创作',  cardDesc: '视频 / 图文 / 文案多形态，紧跟平台热点借势。',
+      full: '视频、图文、文案多形态内容创作，紧跟平台热点节奏，打造有传播力的作品。懂得把"产品语言"翻译成"用户语言"。' },
+    { num: '03', title: '实习经历',  cardDesc: 'FPS / 二次元 / 模拟经营多品类游戏的 KOL 运营实战。',
+      full: '覆盖多品类游戏的 KOL/KOC 运营与达人对接实战，从招募到内容落地全流程参与。理解不同品类用户的内容偏好。' },
+    { num: '04', title: '数据复盘',  cardDesc: '投放数据汇总与异常归因：盯着单位效率看，不盯总量。',
+      full: '投放数据汇总、异常归因与效果复盘。看点击率与单位效率，而不是曝光总量——曝光能砸钱买，但点击率骗不了人。' },
+    { num: '05', title: '达人招募',  cardDesc: 'KOL/KOC 多垂类筛选与对接，统筹渠道供应商资源。',
+      full: '精准筛选、挖掘与对接多垂类达人资源，统筹渠道供应商，保障内容稳定输出与档期排布。' },
   ];
 
-  const arc = { spread: 165, lift: 34, tilt: 12, scaleDrop: 0.055, baseY: -150 };
+  // 横排一字参数：间距大、几乎不旋转、不下垂（参考图是平稳横排+微微 perspective）
+  // baseY 决定卡片中心的纵向位置：负值=把卡片从屏幕底部往上抬
+  //   -60 → 卡片中心在屏底上方 60px（卡片底伸出屏幕下方约 85px，被任务栏/进度条挡住 → 用户反馈太靠下）
+  //   -260 → 卡片中心在屏底上方 260px（卡片整体在屏底上 115px 处完整显示，避让进度条）
+  const flat = { spread: 260, tilt: 2.5, baseY: -260 };
 
   const stage = document.getElementById('cards-stage');
   const cardEls = CARDS.map((c, i) => {
-    const idx = i - (CARDS.length - 1) / 2;   // -2,-1,0,1,2（0 是中间）
+    const idx = i - (CARDS.length - 1) / 2;   // -2,-1,0,1,2（0 是中间，激活态给它 ▶）
     const el = document.createElement('div');
-    el.className = 'card';
+    el.className = 'card' + (idx === 0 ? ' playing' : '');
     el.innerHTML =
-      '<div class="card-glow"></div>' +
-      '<div class="card-emoji">' + c.emoji + '</div>' +
-      '<div class="card-body"><div class="card-title">' + c.title + '</div>' +
-      '<div class="card-sub">' + c.sub + '</div></div>' +
-      '<div class="card-tag">' + c.tag + ' · 查看 →</div>';
-    el.style.setProperty('--glow', c.glow);
+      '<div class="card-num">' + c.num + '</div>' +
+      '<h3 class="card-title">' + c.title + '</h3>' +
+      '<p class="card-desc">' + c.cardDesc + '</p>' +
+      '<div class="card-play">▶</div>';
     stage.appendChild(el);
     return { el, idx, data: c };
   });
@@ -357,20 +434,19 @@
   let transitioning = false;
   let cardT = 0;                 // 卡片浮现进度 0~1，独立于 p（转场后才驱动）
 
-  // 卡片弧形展开：t 0~1，先整体升起淡入，再两侧展开成弧形
+  // 卡片浮现：整体淡入 + 横排一字展开（中间微微下垂、两端微微旋转模拟 perspective）
   function setCards(t) {
     const cOp = clamp(t, 0, 1);
-    const spreadT = clamp((t - 0.35) / 0.65, 0, 1);
-    const liftPx = (1 - cOp) * 300;
+    const liftPx = (1 - cOp) * 260;
     for (const { el, idx } of cardEls) {
-      const abs = Math.abs(idx);
-      const x = idx * arc.spread * spreadT;
-      const y = arc.baseY + (-abs * arc.lift * spreadT) + liftPx;
-      const rot = idx * arc.tilt * spreadT;
-      const sc = 1 - abs * arc.scaleDrop * spreadT;
+      // 横排间距：idx * spread, 整体上移 baseY 让卡从下方升上来
+      const x = idx * flat.spread * t;
+      const y = flat.baseY + liftPx * (1 - t);
+      // 微旋转：两端轻歪（±2.5° * idx），给一点 perspective 倾斜感
+      const rot = idx * flat.tilt * t;
       el.style.opacity = cOp.toFixed(3);
       el.style.pointerEvents = cOp > 0.5 ? 'auto' : 'none';
-      el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
+      el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + rot.toFixed(2) + 'deg)';
     }
   }
 
@@ -485,10 +561,10 @@
     desc: document.getElementById('ov-desc'),
   };
   function openCard(data) {
-    ov.emoji.textContent = data.emoji;
+    ov.emoji.textContent = data.num;
     ov.title.textContent = data.title;
-    ov.tag.textContent = data.tag + ' · 查看详情';
-    ov.desc.textContent = data.desc;
+    ov.tag.textContent = 'WORK · 查看详情';
+    ov.desc.textContent = data.full;
     overlay.classList.add('show');
   }
   function closeCard() { overlay.classList.remove('show'); }
