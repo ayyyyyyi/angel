@@ -16,3 +16,7 @@ Thumbs.db
 portfolio/parallax/face-preview.png
 portfolio/parallax/face-preview-v2.png
 portfolio/parallax/_pdf_full.txt
+
+# ===== dressup 历史备份快照（.bak/.bak2/.bak-日期 等，不进仓库）=====
+*.bak
+*.bak*
